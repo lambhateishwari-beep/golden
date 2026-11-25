@@ -1,28 +1,27 @@
-# The Golden Sip — Owner Menu Panel Starter
+# The Golden Sip Café – menu, WhatsApp ordering & owner panel
 
-This is a starter owner panel for managing menu categories and dishes (prices, descriptions, availability, adding/deleting). It uses Firebase Authentication and Firestore; it is **not secure until you finish the Firebase setup and replace the placeholders**.
+* Customers: `/` – menu, search, Veg / Non-Veg / Beverages filters, cart, order sent to WhatsApp **+91 75594 92970**
+* Owner: `/admin` – password login; change prices, add/rename/delete categories and dishes, mark dishes sold out, reorder.
+  Nothing in the owner panel works without the password (checked on the server, not in the page).
 
-## 1. Create Firebase
-1. Go to https://console.firebase.google.com/ and create a project.
-2. Add a Web App and copy the Firebase config into `app.js`.
-3. Authentication → Sign-in method → enable Email/Password.
-4. Authentication → Users → Add user. Create the owner's email/password.
-5. Open that user and copy the UID. Replace `REPLACE_WITH_OWNER_AUTH_UID` in BOTH `app.js` and `firestore.rules`.
-6. Firestore Database → Create database.
-7. In Firestore Rules, paste the rules from `firestore.rules` and Publish.
+## Put it live (about 10 minutes)
 
-## 2. Deploy
-Upload the files in this folder to a GitHub repository (keep `index.html` at the repository root) and import it into Vercel. No build command is required for this static starter.
+1. **Replace your current site files.** Open the GitHub repo that Vercel deploys for `goldensip-kohl.vercel.app`,
+   delete the old files, and upload everything from this folder (keep the folders `api`, `lib`, `public`).
+   (Or create a new Vercel project from this folder.)
+2. **Add the free database** (so price/menu changes are saved):
+   Vercel dashboard → your project → **Storage** → *Create Database* → **Upstash Redis** (free plan) → connect it to the project.
+   Vercel adds the connection settings by itself.
+3. **Set the owner password:** Project → **Settings → Environment Variables** → add
+   `ADMIN_PASSWORD` = the password you want (Production, Preview, Development).
+   Optional: `SESSION_SECRET` = any long random text.
+4. **Redeploy** (Deployments → ⋯ → Redeploy). Open `https://<your-site>/admin` and log in.
 
-## 3. Existing website integration
-This starter is a separate admin page. It does not automatically connect to an existing site's menu display. To integrate with your existing website, use the same Firestore collections (`categories` and `dishes`) in its menu rendering code and add the Firebase initialization. Do not replace your current website with this starter unless you want the simple sample layout.
+Project settings: Framework Preset = **Other**; leave Build Command / Output Directory empty (vercel.json already sets them).
 
-## Collections
-- `categories`: documents with `name`
-- `dishes`: documents with `name`, `description`, `price`, `categoryId`, `available`
-
-## Important security notes
-- Replace all config placeholders and the UID placeholders.
-- Firestore rules restrict writes to the owner UID. Reads are public for menu display.
-- Never share the owner's password or UID unnecessarily.
-- Consider restricting owner sign-up and use only the created owner account.
+## Notes
+* Change the WhatsApp number: `WHATSAPP` near the top of the script in `public/index.html`.
+* Until the first Save in the owner panel, customers see the starting menu from `lib/default-menu.json`.
+  After the first Save the database copy is used.
+* 8 wrong passwords in 15 minutes locks that visitor out for 15 minutes.
+* Test on your computer: `ADMIN_PASSWORD=test node dev-server.js` → http://localhost:3000 (no database → read-only).
